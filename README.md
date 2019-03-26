@@ -64,16 +64,18 @@ python tactac.py --build --continue (--config <my_config.py>)
 ## Queries 
 
 ### Accession to TaxID
+Give a single accession number as command line argument or file. The file format has to be either in `fasta` format which may also contain sequence data to be ignored or be a list of accessions (one per row).
 ```shell
 python tactac.py --acc2tax [<file>|<acc>]
 ```
 
 ### TaxID and associated Accessions
+For each taxonomic node in the subtree given by `acc` via command line or listed row-wise in a file, the list of directly associated accession will be output in the row format `taxid,acc1,acc2,...`
 ```shell
 python tactac.py --tax2acc [<file>|<acc>]
 ```
 
-### Taxonomy based Binning
+### Taxonomy aware Binning
 Splits your reference library (e.g. given by the raw `nt` fasta file) with respect to the taxonomy. This is an important pre-processing step to apply taxonomy-aware indexing with [DREAM-Yara](https://github.com/temehi/dream_yara). Be sure your PostgreSQL server is running and the previous steps have been finished.
 ```shell
 python tactac.py --bin <bin_dir> --library <library_file(s)>
