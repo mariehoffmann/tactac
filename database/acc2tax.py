@@ -18,7 +18,7 @@ import config as cfg
 acc_rx = re.compile('\W+')
 
 def acc2tax_sql(con, cur, acc):
-    cur.execute('SELECT tax_id FROM accessions WHERE accession = {}'.format(acc))
+    cur.execute("SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
     con.commit()
     acc = cur.fetchone()[0]
     return acc
@@ -43,8 +43,7 @@ def acc2tax(args):
                     if mo is None:
                         print("Parse Error: could not extract accession number from fasta file '{}'".format(line))
                         f_fail.write("{}".format(line))
-                        continue
-                    elif:
+                    else:
                         acc = mo.group(1)
                         tax = acc2tax_sql(con, cur, acc)
                         f_out.write("{},{}\n".format(acc, tax))
@@ -60,10 +59,12 @@ def acc2tax(args):
                 line = f.readline()
         print('Result file written to:\t\t', f_out_name)
         print('Unresolved accessions written:\t', f_out_fail)
+        value = True
     # else interprete as accession
     else:
-        return acc2tax_sql(cur, con, acc)
+        value = acc2tax_sql(cur, con, acc)
 
     # close database connection
     cur.close()
     con.close()
+    return value

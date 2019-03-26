@@ -44,23 +44,26 @@ def tax2acc(args):
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-
-    f_out_name = os.path.join(cfg.WORK_DIR, 'tax2acc.csv')
-    f_out_fail = os.path.join(cfg.WORK_DIR, 'tax2acc.unfound.csv')
-    if os.path.isfile(args.tax2acc[0]) is True:
-        with open(file_path, 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
+    if os.path.isfile(args.tax2acc[0]):
+        if not os.path.isdir(cfg.WORK_DIR):
+            os.makedirs(cfg.WORK_DIR)
+        f_out_name = os.path.join(cfg.WORK_DIR, 'tax2acc.csv')
+        f_out_fail = os.path.join(cfg.WORK_DIR, 'tax2acc.unfound.csv')
+        with open(args.tax2acc[0], 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
             line = f_in.readline()
             while line:
-                mo = RX_TAXID.search(line)
+                mo = cfg.RX_TAXID.search(line)
                 if mo is None:
                     print("Parse Error: could not extract accession number from fasta file '{}'".format(line))
                     f_fail.write("{}".format(line))
                 else:
                     tax = mo.group(1)
                     acc_list = tax2acc_sql(con, cur, tax)
-                    f_out.write(acc + ", " + ",".join([str(acc) for acc in acc_list]))
-                    f_out.write("{},{}\n".format(acc, tax))
+                    f_out.write(acc_list)
                 line = f_in.readline()
+        print('Result file written to:\t\t', f_out_name)
+        print('Unresolved accessions written:\t', f_out_fail)
+
     else:
         try:
             int(args.tax2acc[0])

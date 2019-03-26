@@ -38,6 +38,10 @@ FILE_REF = os.path.join(DIR_REF, os.path.basename(URL_REF).split('.')[0])
 # The complete path to the md5 file of the associated reference file.
 FILE_REF_MD5 = os.path.join(DIR_REF_TMP, os.path.basename(URL_REF_MD5))
 
+# working directory for output
+WORK_DIR = os.path.join(HOME_DIR, 'tmp', 'tactac')
+
 # regular expression to extract accession
 RX_ACC = re.compile('\>(\S+)')
-RX_TAXID = re.compile('ORGANISM=(\d+)\&amp')
+RX_WEB_TAXID = re.compile('ORGANISM=(\d+)\&amp')
+RX_TAXID = re.compile('(\d+)')

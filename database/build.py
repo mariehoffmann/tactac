@@ -99,7 +99,7 @@ def fill_accessions_table(args):
                 print(cfg.URL_ACC.format(acc))
                 fp = urllib.request.urlopen(cfg.URL_ACC.format(acc))
                 html_str = fp.read().decode("utf8")
-                mobj = cfg.RX_TAXID.search(html_str)
+                mobj = cfg.RX_WEB_TAXID.search(html_str)
                 if mobj is None:
                     print("ERROR: could not extract accession number from query '{}'".format(URL_ACC.format(mobj.group(0))))
                     continue
