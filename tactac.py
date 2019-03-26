@@ -9,19 +9,16 @@
 # Setup script for downloading and installing the taxonomy and reference databases.
 # Directories and URLS are set in config.py
 import argparse
+import config as cfg
 import os
 import psycopg2
 import subprocess
 import sys
 import tarfile
 
-import config as cfg
-import reference
-from taxonomy.build import build as tax_build
-from taxonomy.download import download as tax_download
-from reference.build import build as ref_build
-from reference.download import download as ref_download
-
+from database import build as build_db
+from database import download_ref
+from database import download_tax
 
 parser = argparse.ArgumentParser(description='Setup and build database relating taxonomic identifiers with accessions and organism names.')
 parser.add_argument('--taxonomy', '-t', dest='taxonomy', action='store_true', \
@@ -36,6 +33,11 @@ parser.add_argument('--config', '-c', dest='config_file', nargs=1, default='conf
     help='Alternative configuration file to set database connection details.')
 parser.add_argument('--continue', dest='continue_flag', default=False, action='store_true', \
     help='Continue flag for filling accession table.')
+parser.add_argument('--acc2tax', '-a', dest='acc2tax', nargs=1, \
+    help='Get the taxID for given accession number or file containing accessions (row-wise or fasta-format).')
+parser.add_argument('--tax2acc', '-x', dest='tax2acc', nargs=1, \
+    help='Get all accessions for a taxonomic subtree given its root taxID.')
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -46,7 +48,11 @@ if __name__ == "__main__":
         download_ref(args)
     if args.build:
         print("Note: for connecting with the PostgreSQL database, use the --password flag to set a password other than the default one (=1234).")
-        build(args)
+        build_db(args)
+    elif args.acc2tax is not None:
+        acc2tax(args)
+    elif args.tax2acc is not None:
+        tax2acc(args)
     else:
-        print("Usage: python tactac.py --(reference|taxonomy|(build [--continue])) [--password <pwd>] [--config <config_file>]")
+        parser.print_help(sys.stderr)
         sys.exit(-1)

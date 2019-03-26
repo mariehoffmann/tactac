@@ -77,6 +77,10 @@ def fill_accessions_table(args):
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
+
+    cur.execute("DROP TABLE accessions")
+    cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
+
     with open(cfg.FILE_REF, 'r') as f:
         for line in f:
             if line.startswith('>'):
@@ -88,8 +92,7 @@ def fill_accessions_table(args):
                 print(mobj.groups()[0])
                 acc = mobj.groups()[0]
                 cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(acc))
-                #print(cur.fetchone())
-                #sys.exit()
+                # extracted accession is already in database, got to next
                 if cur.fetchone() is not None:
                     continue
 
@@ -113,13 +116,14 @@ def fill_accessions_table(args):
     print("... done.")
 
 '''
-    Create database, define schema from taxonomy.sql script, and fill tables.
+    Create database "taxonomy", define schema from taxonomy.sql script, and fill tables.
+    If continue_flag is true, it is assumed that "taxonomy" and schema exists, and
+    also the timely uncritical "node", "names", "lineage" table are filled.
 '''
 def build(args):
     print(args.continue_flag)
     #sys.exit()
     if args.continue_flag is False:
-        # read database creation script
         sql_db = []  # database setup
         sql_tab = []  # table creation commands
         with open('taxonomy.sql', 'r') as f:
