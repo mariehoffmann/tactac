@@ -19,6 +19,8 @@ import tarfile
 from database import build as build_db
 from database import download_ref
 from database import download_tax
+from database.acc2tax import acc2tax
+from database.tax2acc import tax2acc
 
 parser = argparse.ArgumentParser(description='Setup and build database relating taxonomic identifiers with accessions and organism names.')
 parser.add_argument('--taxonomy', '-t', dest='taxonomy', action='store_true', \
@@ -50,7 +52,9 @@ if __name__ == "__main__":
         print("Note: for connecting with the PostgreSQL database, use the --password flag to set a password other than the default one (=1234).")
         build_db(args)
     elif args.acc2tax is not None:
-        acc2tax(args)
+        tax = acc2tax(args)
+        if tax is not True:
+            print("taxID: ", tax)
     elif args.tax2acc is not None:
         tax2acc(args)
     else:
