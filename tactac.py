@@ -52,9 +52,7 @@ if __name__ == "__main__":
         print("Note: for connecting with the PostgreSQL database, use the --password flag to set a password other than the default one (=1234).")
         build_db(args)
     elif args.acc2tax is not None:
-        tax = acc2tax(args)
-        if tax is not True:
-            print("taxID: ", tax)
+        acc2tax(args)
     elif args.tax2acc is not None:
         tax2acc(args)
     else:

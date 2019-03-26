@@ -12,7 +12,7 @@ CREATE DATABASE taxonomy
 
 CREATE TABLE node(
     tax_id int PRIMARY KEY,
-    parent_taxi_id int,
+    parent_tax_id int,
     rank varchar
 );
 

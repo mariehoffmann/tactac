@@ -34,7 +34,6 @@ def tax2acc_sql(con, cur, tax):
         con.commit()
         for record in cur:
             child = record[0]
-            # todo single element tuple might not be subscriptable
             # push back new child node as potential new parent node
             stack.append(child)
     return results
@@ -68,8 +67,7 @@ def tax2acc(args):
         try:
             int(args.tax2acc[0])
             acc_list = tax2acc_sql(con, cur, args.tax2acc[0])
-            print("Accessions for {}:".format(args.tax2acc[0]))
-            print(acc_list)
+            print("Accessions for {}: ".format(args.tax2acc[0]), acc_list)
         except ValueError:
             print("Value Error: taxid = '{}' is not an integer.".format(args.tax2acc[0]))
 
