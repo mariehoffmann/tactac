@@ -64,13 +64,13 @@ python tactac.py --build --continue (--config <my_config.py>)
 ## Queries 
 
 ### Accession to TaxID
-Give a single accession number as command line argument or file. The file format has to be either in `fasta` format which may also contain sequence data to be ignored or be a list of accessions (one per row).
+Give a single accession number as command line argument or file. The file format has to be either in `fasta` format which may also contain sequence data to be ignored or be a list of accessions (one per row). Whenever input values are given directly in  terminal, output will also be printed in terminal, otherwise a result file is generated. 
 ```shell
 python tactac.py --acc2tax [<file>|<acc>]
 ```
 
 ### TaxID and associated Accessions
-For each taxonomic node in the subtree given by `acc` via command line or listed row-wise in a file, the list of directly associated accession will be output in the row format `taxid,acc1,acc2,...`
+For each taxonomic node in the subtree given by `acc` via command line or listed row-wise in a file, the list of directly associated accession will be output in the row format `taxid,acc1,acc2,...`. The output behaviour is the same as for `acc2tax`.
 ```shell
 python tactac.py --tax2acc [<file>|<acc>]
 ```
