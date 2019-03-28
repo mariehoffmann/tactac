@@ -68,7 +68,7 @@ python tactac.py --tax2acc [<file>|<acc>]
 ```
 
 ### Taxonomy aware Binning
-Splits your reference library (e.g. given by the raw `nt` fasta file) with respect to the taxonomy. This is an important pre-processing step to apply taxonomy-aware indexing with [DREAM-Yara](https://github.com/temehi/dream_yara). Be sure your PostgreSQL server is running and the previous steps have been finished.
+Splits your reference library (e.g. given by the raw `nt` fasta file) with respect to the taxonomy. This is an important pre-processing step to apply taxonomy-aware indexing with [DREAM-Yara](https://github.com/temehi/dream_yara). Be sure your PostgreSQL server is running and the previous steps have been finished. If you want to use all accessions that are currently in your database give `all` to the `library` flag.
 ```shell
-python tactac.py --bin <bin_dir> --library <library_file(s)>
+python tactac.py --bin <bin_dir> --library <src_dir>|all
 ```
