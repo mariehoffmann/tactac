@@ -49,8 +49,6 @@ BINNING_DIR = os.path.join(HOME_DIR, 'tactac/binnning')
 LIBRARY_FORMAT_RX = re.compile('[^\s]+\.(fa|FA|fasta|FASTA)')
 # file suffix for binned reference library
 LIBRARY_BIN_FORMAT = 'fasta'
-# Number of bins into which library will be split.
-NUM_BINS = 256
 # Maximal factor a bin size (in terms of space) differs from uniform (=1.0) distribution.
 # E.g., 256 GB equally distributed over 256 bins are 1 GB per bin. With MAX_RATIO=2.0,
 # the largest bin should not store than 2 GB of the sequences.
