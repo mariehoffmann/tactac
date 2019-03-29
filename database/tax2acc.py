@@ -24,6 +24,7 @@ def tax2acc_sql(con, cur, tax):
         # query for accessions assigned directly to this node
         print("SELECT accession FROM accessions WHERE tax_id = {}".format(node))
         cur.execute("SELECT accession FROM accessions WHERE tax_id = {}".format(node))
+        con.commit()
         for record in cur:
             print("result: ", record[0])
             result += "," + record[0]  # or without indexing
@@ -38,17 +39,17 @@ def tax2acc_sql(con, cur, tax):
             stack.append(child)
     return results
 
-def tax2acc(args):
+def tax2acc(query):
     # connect to database
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-    if os.path.isfile(args.tax2acc[0]):
+    if os.path.isfile(query):
         if not os.path.isdir(cfg.WORK_DIR):
             os.makedirs(cfg.WORK_DIR)
         f_out_name = os.path.join(cfg.WORK_DIR, 'tax2acc.csv')
         f_out_fail = os.path.join(cfg.WORK_DIR, 'tax2acc.unfound.csv')
-        with open(args.tax2acc[0], 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
+        with open(query, 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
             line = f_in.readline()
             while line:
                 mo = cfg.RX_TAXID.search(line)
@@ -65,11 +66,11 @@ def tax2acc(args):
 
     else:
         try:
-            int(args.tax2acc[0])
-            acc_list = tax2acc_sql(con, cur, args.tax2acc[0])
-            print("Accessions for {}: ".format(args.tax2acc[0]), acc_list)
+            int(query)
+            acc_list = tax2acc_sql(con, cur, query)
+            print("Accessions for {}: ".format(query), acc_list)
         except ValueError:
-            print("Value Error: taxid = '{}' is not an integer.".format(args.tax2acc[0]))
+            print("Value Error: taxid = '{}' is not an integer.".format(query))
 
     # close database connection
     cur.close()

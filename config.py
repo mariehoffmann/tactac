@@ -14,6 +14,7 @@ server_name = 'local'
 host_name = 'localhost'
 port = 5432
 user_name = 'postgres'
+password = 'Lake1970'
 
 # taxonomy database directory and download urls
 HOME_DIR = os.path.expanduser("~")
@@ -40,6 +41,26 @@ FILE_REF_MD5 = os.path.join(DIR_REF_TMP, os.path.basename(URL_REF_MD5))
 
 # working directory for output
 WORK_DIR = os.path.join(HOME_DIR, 'tmp', 'tactac')
+
+## Settings for taxonomic binning of a sequence library.
+# Output directory for bins
+BINNING_DIR = os.path.join(HOME_DIR, 'tactac/binnning')
+# Regular expression for input file format of library.
+LIBRARY_FORMAT_RX = re.compile('[^\s]+\.(fa|FA|fasta|FASTA)')
+# file suffix for binned reference library
+LIBRARY_BIN_FORMAT = 'fasta'
+# Number of bins into which library will be split.
+NUM_BINS = 256
+# Maximal factor a bin size (in terms of space) differs from uniform (=1.0) distribution.
+# E.g., 256 GB equally distributed over 256 bins are 1 GB per bin. With MAX_RATIO=2.0,
+# the largest bin should not store than 2 GB of the sequences.
+MAX_RATIO = 2.0
+# number of reference sequences buffered before written to up to NUM_BINS files
+BUFFER_SIZE = 1000
+# source file header line prefix
+HEADER_PREFIX = '>'
+# file prefix for the binned library files, i.e. FILE_PREFIX1.fasta, FILE_PREFIX2.fasta, etc.
+FILE_PREFIX = 'bin'
 
 # regular expression to extract accession
 RX_ACC = re.compile('\>?([\S\.]+)')

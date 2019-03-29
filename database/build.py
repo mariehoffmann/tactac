@@ -9,7 +9,6 @@
 import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-
 import sys
 import urllib.request
 
@@ -78,30 +77,32 @@ def fill_accessions_table(args):
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
 
-    cur.execute("DROP TABLE accessions")
-    cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
+    if not args.continue_flag:
+        cur.execute("DROP TABLE accessions")
+        cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
 
     with open(cfg.FILE_REF, 'r') as f:
         for line in f:
-            if line.startswith('>'):
-                print(line)
+            if line.startswith(cfg.HEADER_PREFIX):
+                #print(line)
                 mobj = cfg.RX_ACC.search(line)
                 if mobj is None:
                     print("ERROR: could not extract accession number from '{}'".format(line))
+                    sys.exit(-1)
                     continue
-                print(mobj.groups()[0])
                 acc = mobj.groups()[0]
                 cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(acc))
                 # extracted accession is already in database, got to next
                 if cur.fetchone() is not None:
+                    print("{} already in accessions table.".format(acc))
                     continue
-
-                print(cfg.URL_ACC.format(acc))
+                print("Fetching {}".format(acc))
+                #print(cfg.URL_ACC.format(acc))
                 fp = urllib.request.urlopen(cfg.URL_ACC.format(acc))
                 html_str = fp.read().decode("utf8")
                 mobj = cfg.RX_WEB_TAXID.search(html_str)
                 if mobj is None:
-                    print("ERROR: could not extract accession number from query '{}'".format(URL_ACC.format(mobj.group(0))))
+                    print("ERROR: could not extract taxid from query '{}'".format(URL_ACC.format(mobj.group(0))))
                     continue
                 tax_id = int(mobj.groups()[0])
                 cur.execute("SELECT * FROM node WHERE tax_id = {}".format(tax_id))
@@ -121,6 +122,7 @@ def fill_accessions_table(args):
     also the timely uncritical "node", "names", "lineage" table are filled.
 '''
 def build(args):
+    print("enter build")
     print(args.continue_flag)
     #sys.exit()
     if args.continue_flag is False:
@@ -147,7 +149,7 @@ def build(args):
             con.commit()
         cur.close()
         con.close()
-        # connecto to newly created taxonomy DB
+        # connect to newly created taxonomy DB
         con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
         con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = con.cursor()

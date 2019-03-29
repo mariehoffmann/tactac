@@ -1,3 +1,13 @@
 local_config.py
 .DS_Store
 .git
+__pycache__
+
+# ignore log files
+*.log
+
+# latex compilation files
+*.aux
+*.fls
+*.gz
+*.fdb_latexmk

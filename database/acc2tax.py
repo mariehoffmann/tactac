@@ -23,18 +23,27 @@ def acc2tax_sql(con, cur, acc):
     tax = cur.fetchone()[0]
     return tax
 
-def acc2tax(args):
+def acc2tax(query):
     # connect to database
-    con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
+    con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=cfg.password)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-    if os.path.isfile(args.acc2tax[0]):
+    print(query)
+    if type(query) == type([]):
+        results = []
+        for acc in query:
+            results.append((acc, acc2tax_sql(con, cur, acc)))
+        # close database connection
+        cur.close()
+        con.close()
+        return results
+    elif os.path.isfile(query):
         if not os.path.isdir(cfg.WORK_DIR):
             os.makedirs(cfg.WORK_DIR)
         f_out_name = os.path.join(cfg.WORK_DIR, 'acc2tax.csv')
         f_out_fail = os.path.join(cfg.WORK_DIR, 'acc2tax.unfound.csv')
         fasta_flag = False
-        with open(args.acc2tax[0], 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
+        with open(query, 'r') as f_in, open(f_out_name, 'w') as f_out, open(f_out_fail, 'w') as f_fail:
             line = f_in.readline()
             while line:
                 if line.startswith('>'):
@@ -55,15 +64,15 @@ def acc2tax(args):
                         acc = mo.group(1)
                         tax = acc2tax_sql(con, cur, acc)
                         f_out.write("{},{}\n".format(acc, tax))
-                        
+
                 line = f_in.readline()
         print('Result file written to:\t\t', f_out_name)
         print('Unresolved accessions written:\t', f_out_fail)
         value = True
     # else interprete as accession
     else:
-        tax = acc2tax_sql(con, cur, args.acc2tax[0])
-        print("TaxID for {}: {}".format(args.acc2tax[0], tax))
+        tax = acc2tax_sql(con, cur, query)
+        print("TaxID for {}: {}".format(query, tax))
 
     # close database connection
     cur.close()
