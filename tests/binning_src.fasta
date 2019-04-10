@@ -1,23 +1,23 @@
 >X17276.1 Giant Panda satellite 1 DNA
-XX17276.1_PANDA
+XX17276.1_PANDA_BIN0_LINE1/1
 >X51700.1 Bos taurus mRNA for bone Gla protein
-X51700.1_BosTaurus_LINE1
-X51700.1_BosTaurus_LINE2
+X51700.1_BosTaurus_BIN0_LINE1/2
+X51700.1_BosTaurus_BIN0_LINE2/2
 >X68321.1 B.taurus mRNA for cyclin A
-X68321.1_BosTaurus
+X68321.1_BosTaurus_BIN0_LINE1/1
 >X55027.1 Bovine mRNA for chromogranin B
-X55027.1_Bovine
+X55027.1_Bovine_BIN0_LINE1/1
 >Z12029.1 B.indicus gene for alpha-lactalbumin
-Z12029.1_B.indicus_LINE1
-Z12029.1_B.indicus_LINE2
-Z12029.1_B.indicus_LINE3
+Z12029.1_B.indicus_BIN0_LINE1/3
+Z12029.1_B.indicus_BIN0_LINE2/3
+Z12029.1_B.indicus_BIN0_LINE3/3
 >X52700.1 Blue Whale common cetacean component DNA
-X52700.1_BlueWhale
+X52700.1_BlueWhale_BIN1_LINE1/1
 >X52701.1 Blue Whale common cetacean component DNA
-X52701.1_BlueWhale
+X52701.1_BlueWhale_BIN1_LINE1/1
 >X52702.1 Blue Whale common cetacean component DNA
-X52702.1_BlueWhale
+X52702.1_BlueWhale_BIN1_LINE1/1
 >X52706.1 B.musculus heavy satellite DNA
-B.musculus_X52706.1
+B.musculus_X52706.1_BIN1_LINE1/1
 >X52703.1 Blue Whale heavy satellite DNA
-BlueWhale_X52703.1
+BlueWhale_X52703.1_BIN1_LINE1/1
