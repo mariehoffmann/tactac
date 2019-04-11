@@ -21,7 +21,6 @@ buffer_cleared = True
 BUFFER_SIZE = 2
 HEADER_PREFIX = '>'
 RX_ACC = re.compile('\>?([\S\.]+)')
-BINNING_DIR = './bins'
 src_files = ['binning_src.fasta']
 
 def init_buffer():
@@ -29,6 +28,7 @@ def init_buffer():
 
 # consumer thread copying from RAM to bin files
 class Buffer2BinsThread(Thread):
+    
     def run(self):
         global bin_files
         global buffer
@@ -43,7 +43,6 @@ class Buffer2BinsThread(Thread):
             if buffer_cleared == True:
                 condition.wait()
             condition.release()
-
             for fid, buffer_per_file in enumerate(buffer):
                 if len(buffer_per_file) > 1:
                     #print("{} >> '{}'".format(buffer_per_file, bin_files[fid]))
@@ -67,13 +66,9 @@ class Lib2BufferThread(Thread):
 
         local_buffer_size = 0
         print(src_files)
-        it_ctr = 0
         while True:
             local_buffer = init_buffer()  #['' for _ in range(num_bins)]
             # switch write active buffer, consumer reads from inactive one
-            it_ctr += 1
-            if it_ctr == 10:
-                break
             for file_id, src_file in enumerate(src_files[state.file_id:], start=state.file_id):
                 refseq = ''
                 acc = ''
@@ -119,8 +114,6 @@ class Lib2BufferThread(Thread):
                             local_buffer = ['' for _ in range(num_bins)]
                             local_buffer_size = 0
 
-
-
             # case: no more source files to read, buffer only partially filled
             if local_buffer_size > 0:
                 condition.acquire()
@@ -143,7 +136,8 @@ if __name__ == '__main__':
     state.file_id = 0
     state.file_offset = 0
     state.in_progress = True
-    print("Status: write {} files in {}".format(num_bins, BINNING_DIR))
 
     Lib2BufferThread().start()
     Buffer2BinsThread().start()
+
+    print("Status: written {} bin files.".format(num_bins))

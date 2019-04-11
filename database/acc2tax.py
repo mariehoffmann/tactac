@@ -19,6 +19,7 @@ acc_rx = re.compile('\W+')
 
 def acc2tax_sql(con, cur, acc):
     cur.execute("SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
+    print('exec: ', "SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
     con.commit()
     tax = cur.fetchone()[0]
     return tax
