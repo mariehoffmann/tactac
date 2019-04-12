@@ -16,7 +16,7 @@ import collections
 import os
 import re
 import sys
-from threading import Thread, Condition
+from threading import Thread, Condition, Event
 
 import config as cfg
 
@@ -37,9 +37,10 @@ buffer = init_buffer()
 # consumer thread copying from RAM to bin files
 class Buffer2BinsThread(Thread):
 
-    def __init__(self, bin_files):
+    def __init__(self, bin_files, binning_done):
         Thread.__init__(self)
         self.bin_files = bin_files
+        self.binning_done = binning_done
 
     def run(self):
         global buffer
@@ -59,6 +60,7 @@ class Buffer2BinsThread(Thread):
                 if len(buffer_per_file) > 1:
                     #print("{} >> '{}'".format(buffer_per_file, bin_files[fid]))
                     # remark single apostrophe (') may occur in header line
+                    #print("dump into ", self.bin_files[fid])
                     os.system('echo "{}" >> {}'.format(buffer_per_file.strip(), self.bin_files[fid]))
             # clear active buffer
             condition.acquire()
@@ -67,6 +69,8 @@ class Buffer2BinsThread(Thread):
             condition.notify()
             condition.release()
             # await buffer to be full
+        # work is done, notify main thread
+        self.binning_done.set()
 
 # producer thread copying from library to RAM
 class Lib2BufferThread(Thread):
@@ -142,9 +146,12 @@ class Lib2BufferThread(Thread):
 def distribute(acc2fid, bin_files):
     global num_bins
     global state
+    binning_done = Event()
     num_bins = len(bin_files)
     state.in_progress = True
     state.buffer_cleared = True
     Lib2BufferThread(acc2fid).start()
-    Buffer2BinsThread(bin_files).start()
+    Buffer2BinsThread(bin_files, binning_done).start()
+    # block main thread until work is done
+    binning_done.wait()
     print("Status: written {} bin files.".format(num_bins))

@@ -19,17 +19,15 @@ def tax2acc_sql(con, cur, tax):
     # collect sub nodes
     while len(stack) > 0:
         node = stack.pop()
-        print("current node is: ", node)
         result = str(node)
         # query for accessions assigned directly to this node
         print("SELECT accession FROM accessions WHERE tax_id = {}".format(node))
         cur.execute("SELECT accession FROM accessions WHERE tax_id = {}".format(node))
         con.commit()
         for record in cur:
-            print("result: ", record[0])
             result += "," + record[0]  # or without indexing
         results += result + '\n'
-        return results
+        #return results
         # push child nodes onto stack
         cur.execute("SELECT tax_id FROM node WHERE parent_taxi_id = {}".format(node))
         con.commit()

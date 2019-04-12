@@ -102,7 +102,7 @@ def fill_accessions_table(args):
                 html_str = fp.read().decode("utf8")
                 mobj = cfg.RX_WEB_TAXID.search(html_str)
                 if mobj is None:
-                    print("ERROR: could not extract taxid from query '{}'".format(URL_ACC.format(mobj.group(0))))
+                    print("ERROR: could not extract taxid from query with accession = {}".format(acc))
                     continue
                 tax_id = int(mobj.groups()[0])
                 cur.execute("SELECT * FROM node WHERE tax_id = {}".format(tax_id))

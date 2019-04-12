@@ -19,7 +19,7 @@ acc_rx = re.compile('\W+')
 
 def acc2tax_sql(con, cur, acc):
     cur.execute("SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
-    print('exec: ', "SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
+    #print('exec: ', "SELECT tax_id FROM accessions WHERE accession = '{}'".format(acc))
     con.commit()
     tax = cur.fetchone()[0]
     return tax
@@ -29,7 +29,7 @@ def acc2tax(query):
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=cfg.password)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-    print(query)
+    #print(query)
     if type(query) == type([]):
         results = []
         for acc in query:
@@ -73,7 +73,7 @@ def acc2tax(query):
     # else interprete as accession
     else:
         tax = acc2tax_sql(con, cur, query)
-        print("TaxID for {}: {}".format(query, tax))
+        #print("TaxID for {}: {}".format(query, tax))
 
     # close database connection
     cur.close()

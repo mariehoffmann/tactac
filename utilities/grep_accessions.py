@@ -27,7 +27,7 @@ def grep_accessions(args):
         con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
         con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = con.cursor()
-        cur.execute("SELECT accession FROM accessions LIMIT 128")
+        cur.execute("SELECT accession FROM accessions LIMIT 10000")
         con.commit()
         for record in cur:
             accessions.append(record[0])
