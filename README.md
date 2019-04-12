@@ -1,8 +1,10 @@
 # tactac
 
 Sets up a PostgreSQL database based by default on the latest taxonomy files provided by NCBI and the `nt` reference dataset. It resolves for each accession the taxonomic ID (taxID) it is assigned to by name. 
-**tactac** provides functions that let's you annotate fasta headers by their accessions. Any tool parsing fasta reference files and needing a taxonomic mapping, e.g. lowest common ancestor computation, may profit from this annotation. 
-Vice versa mapping is also possible, i.e., output all accessions for a given taxID. This allows you to compute reference coverage rates for taxonomic branches or subsample reference sequences for simulation experiments.
+**tactac** provides functions that let's you 
+  * annotate fasta headers by their accessions, e.g. as needed for lowest common ancestor computations
+  * collect all accessions for a given taxID, e.g. for computing reference coverage rates for taxonomic branches or for subsampling reference sequences
+  * taxonomic binning, i.e. distribute the library into `1 << x` bins (fasta files), such that a bin represents a clade, e.g. as pre-processing step for YARA 
 
 ## Prerequisites
 
@@ -70,5 +72,5 @@ python tactac.py --tax2acc [<file>|<acc>]
 ### Taxonomy aware Binning
 Splits your reference library (e.g. given by the raw `nt` fasta file) with respect to the taxonomy. This is an important pre-processing step to apply taxonomy-aware indexing with [DREAM-Yara](https://github.com/temehi/dream_yara). Be sure your PostgreSQL server is running and the previous steps have been finished. If you want to use all accessions that are currently in your database give `all` to the `library` flag.
 ```shell
-python tactac.py --bin <bin_dir> --library <src_dir>|all
+python tactac.py --bin <bin_dir> --library <src_dir>|all [--threads <thread_num>]
 ```
