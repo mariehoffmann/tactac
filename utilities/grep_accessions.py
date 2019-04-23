@@ -16,10 +16,13 @@ import sys
 import config as cfg
 from database.acc2tax import acc2tax
 
+
 def grep_accessions(args):
     accessions = []
     print('args.binning = ', args.binning)
-    #sys.exit()
+    sql_get_accessions = "SELECT accession FROM accessions"
+    if args.limit is not None:
+        sql_get_accessions += " LIMIT {}".format(args.limit[0])     
     # fetch accessions from database, src_file is taken from config
     if args.binning == "all":
         src_files = [cfg.FILE_REF]
@@ -27,7 +30,8 @@ def grep_accessions(args):
         con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
         con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = con.cursor()
-        cur.execute("SELECT accession FROM accessions LIMIT 10000")
+
+        cur.execute(sql_get_accessions)
         con.commit()
         for record in cur:
             accessions.append(record[0])

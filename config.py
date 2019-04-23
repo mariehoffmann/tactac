@@ -31,6 +31,7 @@ URL_ACC = 'https://www.ncbi.nlm.nih.gov/nuccore/{}'
 DIR_BLAST = os.path.join(HOME_DIR, 'tactac/refDB')
 URL_REF = 'ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz'
 URL_REF_MD5 = 'ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz.md5'
+# all fasta files in this directory are assumed to be part of the library
 DIR_REF = os.path.join(HOME_DIR, 'tactac/refDB')
 # The temporary folder for reference file downloads.
 DIR_REF_TMP = os.path.join(HOME_DIR, 'tactac/refDB/tmp')
@@ -52,9 +53,9 @@ LIBRARY_BIN_FORMAT = 'fasta'
 # Maximal factor a bin size (in terms of space) differs from uniform (=1.0) distribution.
 # E.g., 256 GB equally distributed over 256 bins are 1 GB per bin. With MAX_RATIO=2.0,
 # the largest bin should not store than 2 GB of the sequences.
-MAX_RATIO = 2.0
-# number of reference sequences buffered before written to up to NUM_BINS files
-BUFFER_SIZE = 1000
+MAX_RATIO = 1.5
+# number of reference sequences buffered before written to up to num_bins (set via argument parser) files
+BUFFER_SIZE = 4
 # source file header line prefix
 HEADER_PREFIX = '>'
 # file prefix for the binned library files, i.e. FILE_PREFIX1.fasta, FILE_PREFIX2.fasta, etc.

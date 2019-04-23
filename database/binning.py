@@ -43,7 +43,7 @@ def init_bins():
     # create directory
     if os.path.isdir(cfg.BINNING_DIR):  # clear if existing
         response = input('Warning: Output directory ({}) already exists and will be overwritten. [Y|n] ? '.format(cfg.BINNING_DIR))
-        if response == 'N':
+        if response != 'Y':
             sys.exit(-1)
         os.system("rm {}/*".format(cfg.BINNING_DIR))
     else:   # create newly
@@ -150,12 +150,12 @@ def binning(args):
     cur.close()
     con.close()
 
-    print("final distribution: ")
+    binning_distr = {}
     # split given the global accession to file ID dictionary
     for fid, key in enumerate(sorted(tax2accs.keys())):
         for acc in tax2accs[key]:
             acc2fid[acc] = fid
-        print("{}: {} accs".format(fid, len(tax2accs[key])))
+        binning_distr[fid] = len(tax2accs[key])
 
     # concurrent library distribution
     distribute(acc2fid, bin_files)
@@ -163,11 +163,20 @@ def binning(args):
     # check files sizes in terms of line numbers
     lines_rx = re.compile('^\s+(\d+)\s+.+?')
     file_lines = []
-    for bin_file in bin_files:
+    for fid, bin_file in enumerate(bin_files):
         result = subprocess.check_output("wc -l " + str(bin_file), stderr=subprocess.STDOUT, shell=True)
         mobj = lines_rx.match(result.decode('ascii'))
         if mobj is None:
             print("Error: could not extract number of lines from '{}'".format(result))
             sys.exit(0)
-        file_lines.append(int(mobj.group(1)))
-    print('lines per bin: ', file_lines)
+        binning_distr.update({fid: (binning_distr[fid], int(mobj.group(1)))})
+    print("\n\tFinal distribution")
+    print("fid\taccession_count\tline_count")
+    for k, v in sorted(binning_distr.items()):
+        #if len(str()) < 8:
+        #    print("{}\t{}\t\t{}".format(k, v[0], v[1]))
+        #else:
+        print("{}\t{}\t\t{}".format(k, v[0], v[1]))
+    print("------------------------------")
+    print("sum\t{}\t\t{}".format(sum([count[0] for count in binning_distr.values()]), sum([count[1] for count in binning_distr.values()])))
+    print("------------------------------")
