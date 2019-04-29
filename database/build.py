@@ -6,6 +6,7 @@
     author: Marie Hoffmann ozymandiaz147[at]gmail[.]com
 '''
 
+import csv
 import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -71,7 +72,7 @@ def fill_lineage_table(args):
     the table instead of rebuilding it.
 '''
 def fill_accessions_table(args):
-    log = ''
+    log_file = os.path.join(cfg.WORK_DIR, 'unresolved_accessions.log')
     print("Start filling table 'accessions' ...")
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -81,6 +82,28 @@ def fill_accessions_table(args):
         cur.execute("DROP TABLE accessions")
         cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
 
+    with open(cfg.FILE_ACC2TAX, 'r') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter='\t')
+        for row in reader:
+            cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(row['accession']))
+            # extracted accession is already in database, got to next
+            if cur.fetchone() is not None:
+                print("{} already in accessions table.".format(row['accession']))
+                continue
+            cur.execute("SELECT * FROM node WHERE tax_id = '{}';".format(row['taxid']))
+            if cur.fetchone() is None:
+                 os.system("echo 'Missing node with tax_id = {}' >> {}".format(row['taxid'], log_file))
+                 continue
+            cur.execute("INSERT INTO accessions VALUES ({}, '{}')".format(row['taxid'], row['accession']))
+            print("INSERT INTO accessions VALUES ({}, '{}')".format(row['taxid'], row['accession']))
+            con.commit()
+    cur.close()
+    con.close()
+    print("Missing taxids in node table have been written to {}".format(log_file))
+
+    print("... done.")
+
+'''
     with open(cfg.FILE_REF, 'r') as f:
         for line in f:
             if line.startswith(cfg.HEADER_PREFIX):
@@ -102,19 +125,17 @@ def fill_accessions_table(args):
                 html_str = fp.read().decode("utf8")
                 mobj = cfg.RX_WEB_TAXID.search(html_str)
                 if mobj is None:
-                    print("ERROR: could not extract taxid from query with accession = {}".format(acc))
+                    os.system("echo 'Regex RX_WEB_TAXID not found for {}' >> {}".format(acc, log_file))
                     continue
                 tax_id = int(mobj.groups()[0])
                 cur.execute("SELECT * FROM node WHERE tax_id = {}".format(tax_id))
                 if cur.fetchone() is None:
-                    log += 'Missing node with tax_id = {}\n'.format(tax_id)
+                    os.system("echo 'Missing node with tax_id = {}' >> {}".format(tax_id, log_file))
                     continue
                 cur.execute("INSERT INTO accessions VALUES (%s, %s)", (tax_id, acc));
                 con.commit()
-    cur.close()
-    con.close()
-    print(log)
-    print("... done.")
+'''
+
 
 '''
     Create database "taxonomy", define schema from taxonomy.sql script, and fill tables.

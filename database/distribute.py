@@ -89,7 +89,6 @@ class Lib2BufferThread(Thread):
             local_buffer = init_buffer()
             refseq = ''
             acc = ''
-            acc_prev = None
             with open(cfg.FILE_REF, 'r') as f:
                 ignore = False
                 for line in f:

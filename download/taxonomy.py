@@ -11,8 +11,9 @@ import subprocess
 import sys
 
 import config as cfg
+from utilities.check_md5 import check_md5
 
-def tax_download():
+def download_tax():
 
     # create database directory
     print(cfg.DIR_TAX)
@@ -47,7 +48,3 @@ def tax_download():
         if fname not in ['nodes.dmp', 'taxidlineage.dmp', 'names.dmp', tax_arx, tax_arx_md5]:
             os.remove(os.path.join(cfg.DIR_TAX_TMP, fname))
     print("... ok.")
-
-
-if __name__ == "__main__":
-    download()

@@ -20,17 +20,32 @@ Start the PostgreSQL Server in its default configuration. If you want to change 
   python tactac.py --help
 ```
 
-### Download Taxonomy
+### Download Reference and Taxonomy Files
+#### Download Taxonomy
 `tactac` relies on a set of files provided by NCBI, namely, `nodes.dmp`, `names.dmp`, and `taxidlineage.dmp` in order to create the full taxonomy, and assign names to taxIDs.
 ```shell
-python tactac.py --taxonomy
+python tactac.py --download tax
 ```
 
-### Download Reference
+#### Download Reference
 `tactac` will resolve NCBI accession IDs to taxonomic identifiers. In order to do so, per default the complete non-human nucleotide data set in fasta format will be downloaded (`nt`). You can change the reference data set by editing the provided  configuration file.
 ```shell
-python tactac.py --reference
+python tactac.py --download ref
 ```
+
+#### Download Accession to Reference Resolution Table
+Per default the latest `nucl_gb.accession2taxid.gz` file from `ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid` will be downloaded. To modify the edit `config.py`.
+
+```shell
+python tactac.py --download acc2tax
+```
+
+#### Download All
+Alternatively, to download all files at once use the `all` option.
+```shell
+python tactac.py --download all
+```
+
 
 ### Build Database
 
@@ -43,14 +58,14 @@ Start running the installed PostgreSQL server. With the `build` option a new dat
 
 
 ```shell
-python tactac.py --build
+python tactac.py --build --password <pwd>
 ```
 
 #### Continue or Update
 HTTP queries are the bottleneck of the build process. In case of interruption or partial failure of queries, you can continue the filling of the `Accessions` table by setting the `--continue` flag. The other three tables won't be modified (i.e. `Node`, `Names`, `Lineage`)!
 
 ```shell
-python tactac.py --build --continue
+python tactac.py --build --continue --password <pwd>
 ```
 or with personalized configurator
 
@@ -58,7 +73,7 @@ or with personalized configurator
 ## Queries
 
 ### Accession to TaxID
-Give a single accession number as command line argument or file. The file format has to be either in `fasta` format which may also contain sequence data to be ignored or be a list of accessions (one per row). Whenever input values are given directly in  terminal, output will also be printed in terminal, otherwise a result file is generated.
+Give a single accession number (without the version prefix) as command line argument or file. The file format has to be either in `fasta` format which may also contain sequence data to be ignored or be a list of accessions (one per row). Whenever input values are given directly in  terminal, output will also be printed in terminal, otherwise a result file is generated.
 ```shell
 python tactac.py --acc2tax [<file>|<acc>]
 ```
@@ -74,3 +89,8 @@ Splits your reference library (e.g. given by the raw `nt` fasta file) with respe
 ```shell
 python tactac.py --binning [<src_dir>|default='all'] [--num_bins <num_bins>]
 ```
+
+### Taxonomic Subtree
+Create a subset of the complete taxonomy database given a root `taxid`:
+  * Taxonomic clade rooted by `taxid` in csv format `#taxid, parent_taxid` stored in `tactac/subset/<taxid>/root_<taxid>.tax`
+  * All accessions assigned to the clade in csv format `#taxid,[acc1,acc2,...]` stored in `tactac/subset/<taxid>/root_<taxid>.accs` 

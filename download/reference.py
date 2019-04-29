@@ -12,9 +12,9 @@ import subprocess
 import sys
 
 import config as cfg
-from utilities import check_md5
+from utilities.check_md5 import check_md5
 
-def ref_download(args):
+def download_ref(args):
     if os.path.isfile(cfg.FILE_REF):
         print('file nt exists')
         response = input("Reference file '{}' exists, are you sure you want to replace it [Y|n]? ".format(cfg.FILE_REF))
