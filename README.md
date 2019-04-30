@@ -62,10 +62,10 @@ python tactac.py --build --password <pwd>
 ```
 
 #### Continue or Update
-HTTP queries are the bottleneck of the build process. In case of interruption or partial failure of queries, you can continue the filling of the `Accessions` table by setting the `--continue` flag. The other three tables won't be modified (i.e. `Node`, `Names`, `Lineage`)!
+In case the `Accessions` table filling got interrupted (`nugc_gb.accession2taxid` currently contains 258,753,642 entries), you can continue the filling by setting the `--continue` flag. Optionally, you can give a hint terms of last successfully inserted accession. The parser will jump to the succeeding line and omit database queries to test the presence. Note that continuation leaves the other three tables, i.e. `Node`, `Names`, `Lineage`, unmodified!
 
 ```shell
-python tactac.py --build --continue --password <pwd>
+python tactac.py --build --continue [<last_ins_>] --password <pwd>
 ```
 or with personalized configurator
 
@@ -93,4 +93,4 @@ python tactac.py --binning [<src_dir>|default='all'] [--num_bins <num_bins>]
 ### Taxonomic Subtree
 Create a subset of the complete taxonomy database given a root `taxid`:
   * Taxonomic clade rooted by `taxid` in csv format `#taxid, parent_taxid` stored in `tactac/subset/<taxid>/root_<taxid>.tax`
-  * All accessions assigned to the clade in csv format `#taxid,[acc1,acc2,...]` stored in `tactac/subset/<taxid>/root_<taxid>.accs` 
+  * All accessions assigned to the clade in csv format `#taxid,[acc1,acc2,...]` stored in `tactac/subset/<taxid>/root_<taxid>.accs`

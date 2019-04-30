@@ -10,6 +10,7 @@ import csv
 import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import subprocess
 import sys
 import urllib.request
 
@@ -78,13 +79,20 @@ def fill_accessions_table(args):
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
 
+    line_continue = 0
     if not args.continue_flag:
         cur.execute("DROP TABLE accessions")
         cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
+    elif args.continue_flag is not None:
+        print("Locating last processed accession ...")
+        result = subprocess.check_output("grep -m 1 -n -e {} {}".format(args.continue_flag, cfg.FILE_ACC2TAX), stderr=subprocess.STDOUT, shell=True)
+        line_continue = int(result.decode('ascii').split(':')[0])
 
     with open(cfg.FILE_ACC2TAX, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
-        for row in reader:
+        for l_id, row in enumerate(reader):
+            if l_id < line_continue:
+                continue
             cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(row['accession']))
             # extracted accession is already in database, got to next
             if cur.fetchone() is not None:
@@ -143,9 +151,6 @@ def fill_accessions_table(args):
     also the timely uncritical "node", "names", "lineage" table are filled.
 '''
 def build(args):
-    print("enter build")
-    print(args.continue_flag)
-    #sys.exit()
     if args.continue_flag is False:
         sql_db = []  # database setup
         sql_tab = []  # table creation commands

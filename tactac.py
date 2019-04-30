@@ -40,7 +40,7 @@ parser.add_argument('--binning', nargs='?', \
     directory or an "all" flag which will distribute all accessions registered in the accessions table.')
 parser.add_argument('--build', '-b', dest='build', action='store_true', \
     help='Given reference and taxonomy files build the database schema.')
-parser.add_argument('--continue', dest='continue_flag', default=False, action='store_true', \
+parser.add_argument('--continue', dest='continue_flag', nargs='?', default=False, \
     help='Continue flag for filling accession table.')
 parser.add_argument('--download', dest='download', nargs=1, type=str, \
     help='Download taxonomy (tax), reference (ref), accession to taxid resolution file (acc2tax), or all (all). \
