@@ -91,6 +91,17 @@ python tactac.py --binning [<src_dir>|default='all'] [--num_bins <num_bins>]
 ```
 
 ### Taxonomic Subtree
-Create a subset of the complete taxonomy database given a root `taxid`:
-  * Taxonomic clade rooted by `taxid` in csv format `#taxid, parent_taxid` stored in `tactac/subset/<taxid>/root_<taxid>.tax`
-  * All accessions assigned to the clade in csv format `#taxid,[acc1,acc2,...]` stored in `tactac/subset/<taxid>/root_<taxid>.accs`
+Create a subset of the complete taxonomy database given a root `taxid`. Four files will be generated:
+
+  * Taxonomy file (`*.tax`), i.e. the taxonomic clade rooted by `taxid` in csv format `#taxid, parent_taxid` stored in `tactac/subset/<taxid>/root_<taxid>.tax`
+  * Taxid table (`*.acc`) with directly assigned accessions, i.e. all accessions assigned to the clade in csv format `#taxid,acc1,acc2,...` stored in `tactac/subset/<taxid>/root_<taxid>.accs`
+  * Sequence file (`*.fasta`) containing all references assigned to the clade
+  * Positional map (`ID2acc`), i.e. a 1-based counter corresponding to an accession and its position within the above generated fasta file
+
+## All Parameters
+
+
+  References:
+  -----------
+
+  [1] Federhen, S. (2012). The NCBI Taxonomy database. Nucleic Acids Research, 40(D1), D136–D143. http://doi.org/10.1093/nar/gkr1178

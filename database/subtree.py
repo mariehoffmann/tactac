@@ -33,6 +33,8 @@ def subtree(args):
     file_tax = os.path.join(dir_subset_tax, 'root_{}.tax'.format(taxid))
     # accessions as [taxid,acc1,acc2,...]
     file_acc = os.path.join(dir_subset_tax, 'root_{}.acc'.format(taxid))
+    # map of positional counter (ID) and written out accession
+    file_ID2acc = os.path.join(dir_subset_tax, 'root_{}.id'.format(taxid))
 
     # open DB connection
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
@@ -64,7 +66,7 @@ def subtree(args):
             con.commit()
             for record in cur:
                 taxid_stack.append(record[0])
-                print(record)
+                #print(record)
                 ft.write('{},{}\n'.format(record[0], current_taxid))
     cur.close()
     con.close()
@@ -76,8 +78,9 @@ def subtree(args):
     file_lib = os.path.join(dir_subset_tax, 'root_{}.fasta'.format(taxid))
     buffer = ''
     acc = ''
-    with open(cfg.FILE_REF, 'r') as f, open(file_lib, 'w') as fw:
+    with open(cfg.FILE_REF, 'r') as f, open(file_lib, 'w') as fw, open(file_ID2acc, 'w') as fID:
         ignore = False
+        ID = 1
         for line in f:
             # new header line, check ignore flag
             if line.startswith(cfg.HEADER_PREFIX):
@@ -90,8 +93,14 @@ def subtree(args):
                 if len(accs_set) == 0:
                     break
                 acc = mobj.group(1)
-                ignore = False if acc in accs_set else True
+                if acc in accs_set:
+                    ignore = False
+                    fID.write("{},{}\n".format(ID, acc))
+                    ID += 1
+                else:
+                    ignore = True
             if not ignore:
                 fw.write(line)
 
     print("Library sequences of subtree written to ", file_lib)
+    print("Position IDs of accessions written to ", file_ID2acc)

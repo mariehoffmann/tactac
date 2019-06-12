@@ -27,12 +27,15 @@ FILE_lineage = 'taxidlineage.dmp'
 FILE_names = 'names.dmp'
 URL_ACC = 'https://www.ncbi.nlm.nih.gov/nuccore/{}'
 
+# acc2tax download urls, tmp folder DIR_TAX will be used
+URL_ACC2TAX = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz'
+URL_ACC2TAX_MD5 = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz.md5'
+FILE_ACC2TAX = os.path.join(DIR_TAX_TMP, os.path.basename(URL_ACC2TAX[:-3]))
+
 # reference database directory and ftp urls
 DIR_BLAST = os.path.join(HOME_DIR, 'tactac/refDB')
 URL_REF = 'ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz'
 URL_REF_MD5 = 'ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz.md5'
-URL_TAX2ACC = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz'
-URL_TAX2ACC_MD5 = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz.md5'
 # all fasta files in this directory are assumed to be part of the library
 DIR_REF = os.path.join(HOME_DIR, 'tactac/refDB')
 # The temporary folder for reference file downloads.
@@ -62,6 +65,10 @@ BUFFER_SIZE = 4
 HEADER_PREFIX = '>'
 # file prefix for the binned library files, i.e. FILE_PREFIX1.fasta, FILE_PREFIX2.fasta, etc.
 FILE_PREFIX = 'bin'
+
+## Settings for taxonomic subsets of the library
+# Output directory for storing the taxonomy and the library
+DIR_SUBSET = os.path.join(HOME_DIR, 'tactac/subset')
 
 # regular expression to extract accession
 RX_ACC = re.compile('\>?([\S\.]+)')
