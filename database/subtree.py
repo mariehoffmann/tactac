@@ -17,12 +17,17 @@ import config as cfg
 
 '''
     Produce two files representing a taxonomic subset of the library, namely
-    a taxonomy file in csv format [taxid, p_taxid], list of accessions for each taxid
+    a taxonomy file in csv format [taxid, p_taxid, is_species], list of accessions for each taxid
     in the format [taxid,acc1, acc2,...], and a fasta file with sequences
     corresponding to the collected accessions constituting the taxonomic subtree
     as a subset of the 'nt' dataset.
 '''
+
+# leaf nodes equivalent to species
+leaf_ranks = set(['species', 'varietas', 'forma', 'subspecies', 'subvarietas', 'subforma'])
+
 def subtree(args):
+    print("Enter subtree ...")
     taxid = int(args.subtree[0])
     if not os.path.exists(cfg.DIR_SUBSET):
         os.makedirs(cfg.DIR_SUBSET)
@@ -35,23 +40,27 @@ def subtree(args):
     file_acc = os.path.join(dir_subset_tax, 'root_{}.acc'.format(taxid))
     # map of positional counter (ID) and written out accession
     file_ID2acc = os.path.join(dir_subset_tax, 'root_{}.id'.format(taxid))
+    # fasta file with all accessions of clade
+    file_lib = os.path.join(dir_subset_tax, 'root_{}.fasta'.format(taxid))
 
     # open DB connection
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-
+    print("Connected to DB")
     # get tree and its assigned accession IDs
     taxid_stack = [taxid]
     accs_set = set()
 
+    print("file_tax = ", file_tax)
     with open(file_tax, 'w') as ft, open(file_acc, 'w') as fa:
-        ft.write('#taxid,parent_taxid\n')
-        fa.write('#taxid,acc1,acc2,...\n')
+        ft.write('taxid,parent_taxid,is_species \n')
+        fa.write('taxid,acc1,acc2,...\n')
+        clade_size = 0
         while len(taxid_stack) > 0:
             current_taxid = taxid_stack.pop()
             # grep all accession for current taxid
-            cur.execute("SELECT accession FROM accessions WHERE tax_id = {};".format(current_taxid))
+            cur.execute("SELECT accession FROM accessions WHERE tax_id = {} LIMIT 10;".format(current_taxid))
             con.commit()
             taxid2accs = str(current_taxid)
             for record in cur:
@@ -59,23 +68,22 @@ def subtree(args):
                 accs_set.add(record[0])
             # write only taxids with directly assigned accessions
             if taxid2accs.find(',') > -1:
+                clade_size += 1
                 fa.write(taxid2accs + '\n')
 
             # push back taxonomic children
-            cur.execute("SELECT tax_id FROM node WHERE parent_tax_id = {};".format(current_taxid))
+            cur.execute("SELECT tax_id, rank FROM node WHERE parent_tax_id = {};".format(current_taxid))
             con.commit()
             for record in cur:
                 taxid_stack.append(record[0])
-                #print(record)
-                ft.write('{},{}\n'.format(record[0], current_taxid))
+                is_species = 1 if record[1] in leaf_ranks else 0
+                ft.write('{},{},{}\n'.format(record[0], current_taxid, is_species))
     cur.close()
     con.close()
-
+    print("Clade size (nodes with assigned accessions): ", clade_size)
     print("Taxonomic subtree written to ", file_tax)
     print("Taxonomic mapping written to ", file_acc)
 
-    # TODO: parse library and fetch all sequences given their accessions
-    file_lib = os.path.join(dir_subset_tax, 'root_{}.fasta'.format(taxid))
     buffer = ''
     acc = ''
     with open(cfg.FILE_REF, 'r') as f, open(file_lib, 'w') as fw, open(file_ID2acc, 'w') as fID:

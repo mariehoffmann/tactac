@@ -98,6 +98,10 @@ Create a subset of the complete taxonomy database given a root `taxid`. Four fil
   * Sequence file (`*.fasta`) containing all references assigned to the clade
   * Positional map (`ID2acc`), i.e. a 1-based counter corresponding to an accession and its position within the above generated fasta file
 
+ ```shell
+ python tactac.py --subtree <taxid:int> --password <pwd>
+ ```
+
 ## All Parameters
 
 
