@@ -70,7 +70,7 @@ if __name__ == "__main__":
         if args.download[0] in ['tax', 'all']:
             download_tax()
         if args.download[0] in ['ref', 'all']:
-            download_ref()
+            download_ref(args)
         if args.download[0] in ['acc2tax', 'all']:
             download_acc2tax()
         if args.download[0] in ['acc2tax', 'all', 'ref', 'tax'] is False:
