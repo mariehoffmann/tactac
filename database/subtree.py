@@ -60,7 +60,7 @@ def subtree(args):
         while len(taxid_stack) > 0:
             current_taxid = taxid_stack.pop()
             # grep all accession for current taxid
-            cur.execute("SELECT accession FROM accessions WHERE tax_id = {} LIMIT 10;".format(current_taxid))
+            cur.execute("SELECT accession FROM accessions WHERE tax_id = {};".format(current_taxid))
             con.commit()
             taxid2accs = str(current_taxid)
             for record in cur:

@@ -74,13 +74,23 @@ def fill_lineage_table(args):
 '''
 def fill_accessions_table(args):
     log_file = os.path.join(cfg.WORK_DIR, 'unresolved_accessions.log')
+    if not os.path.isfile(log_file):
+        os.mkdir(os.path.dirname(log_file))
+        os.system("touch {}".format(log_file))
+        print('create log_file at ', log_file)
+    #sys.exit()
     print("Start filling table 'accessions' ...")
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
 
     line_continue = 0
-    if not args.continue_flag:
+    # behaviour of continue_flag
+    # None => continue, but let prog figure out which accessions are already inserted
+    # continue_flag = not None and not False =>
+    print(args.continue_flag)
+    if args.continue_flag == False:
+        print("STATUS: DROP TABLE accessions")
         cur.execute("DROP TABLE accessions")
         cur.execute("CREATE TABLE accessions(tax_id int NOT NULL,accession varchar NOT NULL,PRIMARY KEY(tax_id, accession), FOREIGN KEY (tax_id) REFERENCES node(tax_id));")
     elif args.continue_flag is not None:
@@ -88,22 +98,26 @@ def fill_accessions_table(args):
         result = subprocess.check_output("grep -m 1 -n -e {} {}".format(args.continue_flag, cfg.FILE_ACC2TAX), stderr=subprocess.STDOUT, shell=True)
         line_continue = int(result.decode('ascii').split(':')[0])
 
+    print(cfg.FILE_ACC2TAX)
+    #sys.exit()
     with open(cfg.FILE_ACC2TAX, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
         for l_id, row in enumerate(reader):
             if l_id < line_continue:
                 continue
-            cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(row['accession']))
+            accession = row['accession.version']
+            taxid = row['taxid']
+            cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(accession))
             # extracted accession is already in database, got to next
             if cur.fetchone() is not None:
-                print("{} already in accessions table.".format(row['accession']))
+                print("{} already in accessions table.".format(accession))
                 continue
-            cur.execute("SELECT * FROM node WHERE tax_id = '{}';".format(row['taxid']))
+            cur.execute("SELECT * FROM node WHERE tax_id = '{}';".format(taxid))
             if cur.fetchone() is None:
-                 os.system("echo 'Missing node with tax_id = {}' >> {}".format(row['taxid'], log_file))
+                 os.system("echo 'Missing node with tax_id = {}' >> {}".format(taxid, log_file))
                  continue
-            cur.execute("INSERT INTO accessions VALUES ({}, '{}')".format(row['taxid'], row['accession']))
-            print("INSERT INTO accessions VALUES ({}, '{}')".format(row['taxid'], row['accession']))
+            cur.execute("INSERT INTO accessions VALUES ({}, '{}')".format(taxid, accession))
+            print("INSERT INTO accessions VALUES ({}, '{}')".format(taxid, accession))
             con.commit()
     cur.close()
     con.close()

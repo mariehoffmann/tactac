@@ -65,8 +65,9 @@ parser.add_argument('--threads', type=int, nargs=1, default=1, \
 if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
+    print_help = True
     if args.download is not None:
-        print("here")
+        print_help = False
         if args.download[0] in ['tax', 'all']:
             download_tax()
         if args.download[0] in ['ref', 'all']:
@@ -91,6 +92,6 @@ if __name__ == "__main__":
         print('Elapsed time: ', stop - start, ' seconds')
     elif args.subtree is not None:
         subtree(args)
-    else:
+    elif print_help:
         parser.print_help(sys.stderr)
         sys.exit(-1)
