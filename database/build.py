@@ -99,12 +99,48 @@ def fill_accessions_table(args):
         line_continue = int(result.decode('ascii').split(':')[0])
 
     print(cfg.FILE_ACC2TAX)
-    #sys.exit()
+
+    con.autocommit = False
     with open(cfg.FILE_ACC2TAX, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
+        buffer_size = 1 << 10
+        buffer_loc = 0
+        data = [None for _ in range(buffer_size)]
         for l_id, row in enumerate(reader):
             if l_id < line_continue:
+                #print("line not reached continue, l_id = ", l_id, ", line_continue = ", line_continue)
                 continue
+    #        def execute_method_custom_args_to_string(cursor, data):
+            accession = row['accession.version']
+            taxid = row['taxid']
+            cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(accession))
+            # extracted accession is already in database, got to next
+            if cur.fetchone() is not None:
+                print("{} already in accessions table.".format(accession))
+                continue
+            data[buffer_loc] = [taxid, accession]
+            buffer_loc += 1
+            if buffer_loc == buffer_size:
+                args_str = ",".join("('%s', '%s')" % (x, y) for (x, y) in data)
+                cur.execute("INSERT INTO {table} VALUES".format(table = 'accessions') + args_str)
+                print("INSERT ", data[0], " to ", data[-1])
+                con.commit()
+                data = [None for _ in range(buffer_size)]
+                buffer_loc = 0
+
+    # insert remaining accessions
+    args_str = ",".join("('%s', '%s')" % (x, y) for (x, y) in data[:buffer_loc])
+    cur.execute("INSERT INTO {table} VALUES".format(table = 'accessions') + args_str)
+    print("INSERT last items: ", data[0], " to ", data[-1])
+    con.commit()
+
+    cur.close()
+    con.close()
+    print("Missing taxids in node table have been written to {}".format(log_file))
+
+    print("... done.")
+
+'''
             accession = row['accession.version']
             taxid = row['taxid']
             cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(accession))
@@ -118,12 +154,9 @@ def fill_accessions_table(args):
                  continue
             cur.execute("INSERT INTO accessions VALUES ({}, '{}')".format(taxid, accession))
             print("INSERT INTO accessions VALUES ({}, '{}')".format(taxid, accession))
-            con.commit()
-    cur.close()
-    con.close()
-    print("Missing taxids in node table have been written to {}".format(log_file))
+            if 0 == (l_id % 500):
+'''
 
-    print("... done.")
 
 '''
     with open(cfg.FILE_REF, 'r') as f:
