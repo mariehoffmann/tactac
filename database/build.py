@@ -21,12 +21,22 @@ def fill_node_table(args):
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
+    # add Unknown with taxid = 0
+
+    cur.execute("SELECT * from node where tax_id = 0")
+    if cur is None:
+        cur.execute("INSERT INTO node VALUES (0, 0, 'Unknown')", tuple(cells))
+
+    con.commit()
     with open(os.path.join(cfg.DIR_TAX_TMP, cfg.FILE_nodes), 'r') as f:
         i = 0
         for line in f:
             cells = [cell.strip() for cell in line.split('|')][:3]
             i += 1
-            cur.execute('INSERT INTO node VALUES (%s, %s, %s)', tuple(cells))
+            cur.execute('SELECT * FROM node WHERE tax_id = {}'.format(cells[0]))
+            if cur is None:
+                print('INSERT INTO node VALUES ({}, ...)'.format(cells[0]))
+                cur.execute('INSERT INTO node VALUES (%s, %s, %s)', tuple(cells))
             con.commit()
     cur.close()
     con.close()
@@ -37,6 +47,9 @@ def fill_names_table(args):
     con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
+    # add Unknown
+    cur.execute("INSERT INTO names VALUES (0, 'Unknown', 'Unknown')")
+    con.commit()
     with open(os.path.join(cfg.DIR_TAX_TMP, cfg.FILE_names), 'r') as f:
         for line in f:
             cells = [cell.strip() for cell in line.split('|')][:4]
@@ -73,6 +86,7 @@ def fill_lineage_table(args):
     the table instead of rebuilding it.
 '''
 def fill_accessions_table(args):
+    #fill_node_table(args)
     log_file = os.path.join(cfg.WORK_DIR, 'unresolved_accessions.log')
     if not os.path.isfile(log_file):
         os.mkdir(os.path.dirname(log_file))
@@ -101,28 +115,38 @@ def fill_accessions_table(args):
     print(cfg.FILE_ACC2TAX)
 
     con.autocommit = False
+    print(cfg.FILE_ACC2TAX)
+
     with open(cfg.FILE_ACC2TAX, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
-        buffer_size = 1 << 10
+        buffer_size = 1 << 18
         buffer_loc = 0
         data = [None for _ in range(buffer_size)]
+        # Assume that accessions are filled in consecutively, i.e., all accessions
+        # from src file after first non-present accession are also non-present and have to be inserted
+        skipped = False
         for l_id, row in enumerate(reader):
             if l_id < line_continue:
-                #print("line not reached continue, l_id = ", l_id, ", line_continue = ", line_continue)
                 continue
-    #        def execute_method_custom_args_to_string(cursor, data):
             accession = row['accession.version']
             taxid = row['taxid']
-            cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(accession))
-            # extracted accession is already in database, got to next
+            if skipped == False:
+                cur.execute("SELECT * FROM accessions WHERE accession = '{}';".format(accession))
+                # extracted accession is already in database, got to next
+                if cur.fetchone() is not None:
+                    print("{} already in accessions table.".format(accession))
+                    continue
+                else:
+                    skipped = True
+            cur.execute("SELECT * FROM node WHERE tax_id = '{}';".format(taxid))
             if cur.fetchone() is not None:
-                print("{} already in accessions table.".format(accession))
-                continue
-            data[buffer_loc] = [taxid, accession]
-            buffer_loc += 1
+                data[buffer_loc] = [taxid, accession]
+                buffer_loc += 1
+            else:
+                print("WARNING: unknown taxid for (taxid, acc) = (", taxid, ', ', accession, ')')
             if buffer_loc == buffer_size:
                 args_str = ",".join("('%s', '%s')" % (x, y) for (x, y) in data)
-                cur.execute("INSERT INTO {table} VALUES".format(table = 'accessions') + args_str)
+                cur.execute("INSERT INTO {table} VALUES".format(table = 'accessions') + args_str + " ON CONFLICT DO NOTHING")
                 print("INSERT ", data[0], " to ", data[-1])
                 con.commit()
                 data = [None for _ in range(buffer_size)]
