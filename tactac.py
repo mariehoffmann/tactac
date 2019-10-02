@@ -55,6 +55,8 @@ parser.add_argument('--password', '-p', type=str, dest='password', nargs=1, defa
     help='Password of the postgres user.')
 parser.add_argument('--reference', '-r', dest='reference', action='store_true', \
     help='Download reference file given by its url in the configuration file.')
+parser.add_argument('--num_samples', dest='num_samples', nargs=1, default=5, \
+    help='Maximal number of references to be collected per taxon.')
 parser.add_argument('--subtree', type=int, nargs=1, \
     help='Create library subset rooted by given taxID.')
 parser.add_argument('--taxonomy', '-t', dest='taxonomy', action='store_true', \
