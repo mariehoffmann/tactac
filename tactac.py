@@ -49,19 +49,19 @@ parser.add_argument('--limit', dest='limit', type=int, nargs=1, \
     help="Running taxonomy-aware binning with first LIMIT accessions (e.g. for testing).")
 parser.add_argument('--tax2acc', '-x', nargs=1, \
     help='Get all accessions for a taxonomic subtree given its root taxID.')
-parser.add_argument('--num_bins', type=int, nargs=1, default=256, \
+parser.add_argument('--num_bins', type=int, default=256, \
     help='Additional parameter for binning to give the number of bins into which library will be split.')
-parser.add_argument('--password', '-p', type=str, dest='password', nargs=1, default='1234', \
+parser.add_argument('--password', '-p', type=str, dest='password', default='1234', \
     help='Password of the postgres user.')
 parser.add_argument('--reference', '-r', dest='reference', action='store_true', \
     help='Download reference file given by its url in the configuration file.')
-parser.add_argument('--num_samples', dest='num_samples', nargs=1, default=5, \
+parser.add_argument('--num_samples', type=int, dest='num_samples', default=5, \
     help='Maximal number of references to be collected per taxon.')
-parser.add_argument('--subtree', type=int, nargs=1, \
+parser.add_argument('--subtree', type=int, \
     help='Create library subset rooted by given taxID.')
 parser.add_argument('--taxonomy', '-t', dest='taxonomy', action='store_true', \
     help='Download taxonomy file given by its url in the configuration file.')
-parser.add_argument('--threads', type=int, nargs=1, default=1, \
+parser.add_argument('--threads', type=int, default=1, \
     help='Parallelize with up to <THREADS> many threads.')
 
 if __name__ == "__main__":

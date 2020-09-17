@@ -29,7 +29,7 @@ leaf_ranks = set(['species', 'varietas', 'forma', 'subspecies', 'subvarietas', '
 
 def subtree(args):
     print("Enter subtree ...")
-    clade_taxid = int(args.subtree[0])
+    clade_taxid = int(args.subtree)
     if not os.path.exists(cfg.DIR_SUBSET):
         os.makedirs(cfg.DIR_SUBSET)
     dir_subset_tax = os.path.join(cfg.DIR_SUBSET, str(clade_taxid))
@@ -45,7 +45,7 @@ def subtree(args):
     file_lib = os.path.join(dir_subset_tax, 'root_{}.fasta'.format(clade_taxid))
 
     # open DB connection
-    con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password[0])
+    con = psycopg2.connect(dbname='taxonomy', user=cfg.user_name, host='localhost', password=args.password)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
     print("Connected to DB")
@@ -70,7 +70,7 @@ def subtree(args):
                 ft.write('{},{},{}\n'.format(record[0], taxid, is_species))
     print("Taxonomic subtree written to ", file_tax)
 
-    print("Collecting at most ", args.num_samples[0], " accessions per taxon ...")
+    print("Collecting at most ", args.num_samples, " accessions per taxon ...")
     accs_set = set()
     with open(file_acc, 'w') as fa:
         fa.write('taxid,acc1,acc2,...\n')
@@ -78,7 +78,7 @@ def subtree(args):
         for i in progressbar.progressbar(range(len(taxid_set))):
             taxid = taxid_set.pop()
             # grep at most args.num_samples (default=5) random accessions per taxid
-            cur.execute("SELECT accession FROM accessions WHERE tax_id = {} ORDER BY RANDOM() LIMIT {};".format(taxid, args.num_samples[0]))
+            cur.execute("SELECT accession FROM accessions WHERE tax_id = {} ORDER BY RANDOM() LIMIT {};".format(taxid, args.num_samples))
             #con.commit()
             taxid2accs = str(taxid)
             for record in cur:

@@ -1,0 +1,56 @@
+\documentclass[a4paper]{scrartcl}
+
+\usepackage{algpseudocode,algorithm,algorithmicx}
+
+\algtext*{EndIf}% Remove "end if" text
+\algtext*{EndFor}% Remove "end if" text
+\algtext*{EndWhile}% Remove "end while" text
+\algtext*{EndProcedure}% Remove "end while" text
+
+\begin{document}
+
+Idea: in each iteration set taxonomic ID of an acession to its direct ancestor ID.
+If this ID is existent, the accession list associated with taxID will be merged
+with the one of its ancestor, else the taxID is replaced by its ancestor in the next iteration.
+
+
+\begin{algorithm}
+\caption{Sequential distribution of accessions into $N$ equally filled bins.}
+\begin{algorithmic}[1]
+\Procedure{TaxonomicBinning}{accList, acc2tax, $\pi$, B}
+\State $\textrm{bins} \gets \emptyset$\Comment{Dictionary with keys representing clades and values accessions}
+\State $\textrm{H}\gets 4\cdot \lceil\frac{|\textrm{accList}|}{B}\rceil$\Comment{Size threshold of a bin}
+\For{acc in accList}\Comment{Initial compression ensuring uniqueness of keys}
+    \State $\textrm{tax}_{acc} \gets \textrm{acc2tax}[\textrm{acc}]$
+    \If{$\textrm{tax}_{acc} \not \in \textrm{bins.keys()}$}
+        \State $\textrm{bins}[tax_{acc}] \gets (1, [\textrm{acc}])$
+    \Else
+        \State $\textrm{bins}[tax_{acc}]\gets \textrm{bins}[tax_{acc}] + [(1, \textrm{acc})]$
+     \EndIf
+\EndFor
+\While{$|\textrm{bins}| > B$}\Comment{Number of clades still larger than target}
+  \State $keys \gets \textrm{bins.keys().sort()}$\Comment{Handle lower-level keys first}
+  \State $\textrm{climbers} \gets \emptyset$\Comment{Key-value pairs to be merged with their parent}
+  \State $\textrm{blockedSet}\gets \emptyset$\Comment{Set of nodes that are parent of another key}
+  \For{key $\in $keys}
+    \If{$\textrm{key} \in \textrm{blockedSet}$}\Comment{Node has descendants to be merged into}
+      \State continue
+    \EndIf
+    \If{$\pi[$key$] \in $keys}\Comment{Prevent parent from being replaced}
+      \State $\textrm{blockedSet}\gets \pi[$key$]$
+    \EndIf
+    \State $\textrm{climbers} \gets (\pi[key], key)$
+  \EndFor
+  \For{$\textrm{parent\_key, key} \in climbers$}
+    \If{$\textrm{key} \in \textrm{blockedList}$}
+        \State continue
+    \EndIf
+    \State $\textrm{tax2accs}[parent\_key] \gets [\textrm{tax2accs.pop(key)}]$
+  \EndFor
+\EndWhile
+\Return{tax2accs}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

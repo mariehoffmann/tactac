@@ -1,0 +1,21 @@
+10,000 accessions distributed over 16 bins.
+
+0: 4029 accs
+1: 1015 accs
+2: 1019 accs
+3: 1198 accs
+4: 1060 accs
+5: 277 accs
+6: 386 accs
+7: 30 accs
+8: 47 accs
+9: 138 accs
+10: 71 accs
+11: 42 accs
+12: 459 accs
+13: 1 accs
+14: 213 accs
+15: 15 accs
+
+[50254, 17020, 18430, 20398, 16643, 4858, 4907, 280, 315, 1582, 865, 738, 10177, 116, 2210, 313]
+Elapsed time:  193.52005497700884

@@ -14,10 +14,10 @@ server_name = 'local'
 host_name = 'localhost'
 port = 5432
 user_name = 'postgres'
-password = 'Lake1970'
+#password = 'Lake1970'
 
 # taxonomy database directory and download urls
-HOME_DIR = os.path.expanduser("~")
+HOME_DIR = os.path.expanduser("/Volumes/plastic_data/")
 DIR_TAX = os.path.join(HOME_DIR, 'tactac/taxDB')
 DIR_TAX_TMP = os.path.join(HOME_DIR, 'tactac/taxDB/tmp')
 URL_TAX = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz'
